@@ -2,7 +2,7 @@
 
 ## Active Agents & Worktrees
 - **Architect (Mission Control)**: `~/code/irl` (This Repository) - Central Source of Truth.
-- **Python Agent (Data Science)**: `../irl-python-sdk` - Consumes `clients/python/`.
+- **Python Agent (Data Science)**: `../irl-python-sdk` - Consumes `clients/python/` (Modernized with `requests`, Python 3.10+).
 - **Java Agent (Enterprise)**: `../irl-java-sdk` - Consumes `clients/java/`.
 
 ## Workflow Protocols
