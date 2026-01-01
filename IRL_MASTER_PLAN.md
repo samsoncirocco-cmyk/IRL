@@ -51,7 +51,11 @@ Forwarding: (Optional) Successfully forwarded HEALTHY data to a TARGET_URL.
 🗺️ 4. Future Roadmap (The Scale-Up)
 Step 9: Impact Dashboard: Visualizing "Financial Risk Avoided" metrics for VCs.
 
-Step 10: [x] Multi-Language Client SDKs: Native wrappers for Python (Data Science) and Java (Neo4j).
+Step 10: Multi-Language Client SDKs
+  - [x] Python SDK (`clients/python/irl.py`): Zero-dependency wrapper with `urllib`, Python 3.10+
+  - [x] Java SDK (`clients/java/IrlClient.java`): Native `java.net.http` client (Java 11+)
+  - [x] Worktree Architecture: Separate SDK development in `../irl-python-sdk` and `../irl-java-sdk`
+  - [x] Registry Symlinks: Both SDKs reference centralized registry via symlinks
 
 Step 11: Agentic Negotiation: AI agent that auto-drafts emails to API providers when drift is detected.
 
