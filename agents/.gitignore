@@ -1,0 +1,9 @@
+# Ignore node_modules if agents get their own dependencies
+node_modules/
+
+# Keep reports directory but ignore temporary files
+reports/*.tmp
+reports/*.log
+
+# Don't ignore .md reports - we want them tracked
+!reports/*.md

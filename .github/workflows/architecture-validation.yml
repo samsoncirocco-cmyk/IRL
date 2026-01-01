@@ -1,0 +1,180 @@
+name: IRL Architecture Validation
+
+on:
+  # Run on a schedule (weekly on Mondays at 9 AM UTC)
+  schedule:
+    - cron: '0 9 * * 1'
+
+  # Allow manual trigger
+  workflow_dispatch:
+    inputs:
+      notify_on_issues:
+        description: 'Create GitHub Issue if problems found'
+        required: false
+        default: 'true'
+        type: boolean
+
+  # Run on push to main (optional - can be disabled)
+  push:
+    branches:
+      - main
+    paths:
+      - 'irl/src/**'
+      - 'irl/index.js'
+      - 'irl/pitch-deck.md'
+      - 'IRL_MASTER_PLAN.md'
+
+jobs:
+  validate-architecture:
+    name: Architecture Validation
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: |
+          cd irl
+          npm install --production
+
+      - name: Run Architecture Validation Agent
+        id: validate
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          chmod +x agents/architecture-validator.js
+          node agents/architecture-validator.js > validation-output.txt 2>&1 || echo "validation_failed=true" >> $GITHUB_OUTPUT
+          cat validation-output.txt
+
+      - name: Upload Validation Report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: architecture-validation-report-${{ github.run_number }}
+          path: |
+            agents/reports/architecture-validation-*.md
+            validation-output.txt
+          retention-days: 90
+
+      - name: Commit Report to Repository
+        if: always()
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add agents/reports/
+          git diff --staged --quiet || git commit -m "chore: add architecture validation report [skip ci]"
+          git push || echo "No changes to commit"
+
+      - name: Extract Verdict
+        if: always()
+        id: verdict
+        run: |
+          LATEST_REPORT=$(ls -t agents/reports/architecture-validation-*.md | head -1)
+          if grep -q "✅ Pitch is credible" "$LATEST_REPORT"; then
+            echo "verdict=credible" >> $GITHUB_OUTPUT
+            echo "verdict_emoji=✅" >> $GITHUB_OUTPUT
+          elif grep -q "⚠️ Pitch is directionally right" "$LATEST_REPORT"; then
+            echo "verdict=overstated" >> $GITHUB_OUTPUT
+            echo "verdict_emoji=⚠️" >> $GITHUB_OUTPUT
+          elif grep -q "❌ Pitch is misaligned" "$LATEST_REPORT"; then
+            echo "verdict=misaligned" >> $GITHUB_OUTPUT
+            echo "verdict_emoji=❌" >> $GITHUB_OUTPUT
+          else
+            echo "verdict=unknown" >> $GITHUB_OUTPUT
+            echo "verdict_emoji=❓" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Create GitHub Issue for Critical Findings
+        if: |
+          always() &&
+          (steps.verdict.outputs.verdict == 'misaligned' ||
+           steps.verdict.outputs.verdict == 'overstated') &&
+          (github.event.inputs.notify_on_issues == 'true' || github.event_name == 'schedule')
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const reportPath = require('child_process')
+              .execSync('ls -t agents/reports/architecture-validation-*.md | head -1')
+              .toString()
+              .trim();
+            const reportContent = fs.readFileSync(reportPath, 'utf8');
+
+            // Extract executive summary
+            const summaryMatch = reportContent.match(/## Executive Summary([\s\S]*?)##/);
+            const summary = summaryMatch ? summaryMatch[1].trim() : 'No summary available';
+
+            const verdict = '${{ steps.verdict.outputs.verdict }}';
+            const verdictEmoji = '${{ steps.verdict.outputs.verdict_emoji }}';
+
+            const issue = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `${verdictEmoji} Architecture Validation: ${verdict.toUpperCase()}`,
+              body: `## Architecture Validation Report
+
+            **Verdict:** ${verdictEmoji} ${verdict.toUpperCase()}
+            **Generated:** ${new Date().toISOString()}
+            **Workflow Run:** [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+
+            ### Executive Summary
+
+            ${summary}
+
+            ### Action Required
+
+            ${verdict === 'misaligned'
+              ? '⚠️ **CRITICAL:** The current implementation is significantly misaligned with the pitch. Review required.'
+              : '⚠️ The pitch may overstate current capabilities. Review and adjust messaging as needed.'}
+
+            ### Full Report
+
+            Download the full report from the [workflow artifacts](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}).
+
+            ---
+
+            *This issue was automatically generated by the Architecture Validation Agent.*
+            `,
+              labels: ['architecture', 'validation', verdict === 'misaligned' ? 'critical' : 'review-needed']
+            });
+
+            console.log(`Created issue #${issue.data.number}`);
+
+      - name: Comment on Recent PRs
+        if: |
+          always() &&
+          steps.verdict.outputs.verdict == 'credible' &&
+          github.event_name == 'schedule'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const verdict = '${{ steps.verdict.outputs.verdict }}';
+            const verdictEmoji = '${{ steps.verdict.outputs.verdict_emoji }}';
+
+            console.log(`${verdictEmoji} Architecture validation passed with verdict: ${verdict}`);
+            console.log('Codebase remains aligned with architectural vision.');
+
+      - name: Validation Summary
+        if: always()
+        run: |
+          echo "════════════════════════════════════════════════════════════"
+          echo "🛡️  Architecture Validation Complete"
+          echo "════════════════════════════════════════════════════════════"
+          echo ""
+          echo "Verdict: ${{ steps.verdict.outputs.verdict_emoji }} ${{ steps.verdict.outputs.verdict }}"
+          echo ""
+          echo "Report saved to: agents/reports/"
+          echo "Artifacts uploaded to workflow run"
+          echo ""
+          echo "════════════════════════════════════════════════════════════"

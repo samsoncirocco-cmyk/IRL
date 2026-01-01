@@ -42,3 +42,44 @@ try {
     }
 }
 ```
+
+## Architecture Validation
+
+IRL includes an **autonomous architecture validation agent** that performs regular design reviews to ensure the codebase remains aligned with the pitched architecture.
+
+### Features
+
+- **Automated Reviews**: Runs weekly via GitHub Actions or cron
+- **Principal Engineer Perspective**: Evaluates technical alignment, gaps, and risks
+- **Enterprise Readiness**: Tests against Fortune 500 buyer objections
+- **Compliance Checks**: Validates security and privacy claims
+- **Automated Reporting**: Generates detailed markdown reports with verdicts
+
+### Quick Start
+
+**Manual Run:**
+```bash
+export ANTHROPIC_API_KEY='your_key_here'
+node agents/architecture-validator.js
+```
+
+**GitHub Actions:**
+- Runs automatically weekly (Mondays 9 AM UTC)
+- Manual trigger via Actions tab
+- Auto-generates issues for critical findings
+
+**Cron Job:**
+```bash
+# Add to crontab for weekly validation
+0 9 * * 1 /path/to/code_irl/agents/cron-scheduler.sh
+```
+
+### Documentation
+
+- [Agent Overview](agents/README.md) - How the agent works
+- [Deployment Guide](agents/DEPLOYMENT.md) - Setup instructions
+- [Latest Report](agents/reports/architecture-validation-latest.md) - Most recent validation
+
+---
+
+For more information, see the [Master Plan](IRL_MASTER_PLAN.md) and [Contributing Guidelines](CONTRIBUTING.md).
