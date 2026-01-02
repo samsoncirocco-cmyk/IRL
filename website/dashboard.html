@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IRL Impact Dashboard | Mission Control</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Manrope:wght@800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --primary: #0A192F;
+            --secondary: #64FFDA;
+            --accent: #8892B0;
+            --bg: #F5F5F5;
+            --card-bg: #112240;
+            --text-main: #CCD6F6;
+            --text-sub: #8892B0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        header {
+            width: 100%;
+            padding: 2rem 0;
+            text-align: center;
+            border-bottom: 1px solid rgba(100, 255, 218, 0.1);
+        }
+
+        h1 {
+            font-family: 'Manrope', sans-serif;
+            font-size: 2.5rem;
+            color: var(--secondary);
+            margin: 0;
+        }
+
+        .container {
+            width: 90%;
+            max-width: 1200px;
+            margin: 3rem 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid rgba(100, 255, 218, 0.1);
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            box-shadow: 0 10px 30px -15px rgba(2, 12, 27, 0.7);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            border-color: var(--secondary);
+        }
+
+        .stat-label {
+            color: var(--text-sub);
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: var(--secondary);
+        }
+
+        .roi-section {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, #112240 0%, #0A192F 100%);
+            text-align: center;
+            padding: 4rem 2rem;
+            border-radius: 20px;
+            border: 1px solid var(--secondary);
+        }
+
+        .roi-label {
+            font-size: 1.2rem;
+            color: var(--text-main);
+            margin-bottom: 1rem;
+        }
+
+        .roi-value {
+            font-size: 5rem;
+            font-weight: 800;
+            color: var(--secondary);
+            text-shadow: 0 0 20px rgba(100, 255, 218, 0.3);
+        }
+
+        .breakdown {
+            margin-top: 2rem;
+            display: flex;
+            justify-content: center;
+            gap: 3rem;
+            flex-wrap: wrap;
+        }
+
+        .breakdown-item {
+            text-align: left;
+        }
+
+        .breakdown-item div {
+            color: var(--text-sub);
+            font-size: 0.8rem;
+        }
+
+        .breakdown-item span {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+
+        footer {
+            margin-top: auto;
+            padding: 2rem;
+            color: var(--text-sub);
+            font-size: 0.8rem;
+        }
+
+        #refresh-status {
+            font-size: 0.8rem;
+            color: var(--text-sub);
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <h1>IRL <span style="font-weight:400; color:var(--text-sub)">|</span> Mission Control</h1>
+    </header>
+
+    <div class="container" id="dashboard">
+        <!-- ROI Main -->
+        <div class="roi-section">
+            <div class="roi-label">TOTAL VALUE PROTECTED</div>
+            <div class="roi-value" id="val-total">$0</div>
+
+            <div class="breakdown" id="roi-breakdown">
+                <!-- Items populated by JS -->
+            </div>
+
+            <div id="refresh-status">Live Sync Enabled (polling Sidecar:3000)</div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="stat-card">
+            <div class="stat-label">Safety Checks</div>
+            <div class="stat-value" id="stat-checks">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Blocks (High Risk)</div>
+            <div class="stat-value" id="stat-blocks" style="color: #FF6484;">0</div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">Auto-Healed Payloads</div>
+            <div class="stat-value" id="stat-heals">0</div>
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2026 Integration Resilience Layer. Language-Agnostic Governance Layer.
+    </footer>
+
+    <script>
+        async function fetchStats() {
+            try {
+                // Fetch from the new Sidecar endpoint
+                const res = await fetch('http://localhost:3000/stats');
+                const data = await res.json();
+
+                document.getElementById('val-total').textContent = '$' + (data.valueProtected || 0).toLocaleString();
+                document.getElementById('stat-checks').textContent = (data.totalChecked || 0).toLocaleString();
+                document.getElementById('stat-blocks').textContent = (data.totalBlocked || 0).toLocaleString();
+                document.getElementById('stat-heals').textContent = (data.totalHealed || 0).toLocaleString();
+
+                const breakdown = document.getElementById('roi-breakdown');
+                breakdown.innerHTML = '';
+
+                if (data.breakdown) {
+                    Object.entries(data.breakdown).forEach(([key, value]) => {
+                        const div = document.createElement('div');
+                        div.className = 'breakdown-item';
+                        div.innerHTML = `<div>${key}</div><span>$${value.toLocaleString()}</span>`;
+                        breakdown.appendChild(div);
+                    });
+                }
+
+                document.getElementById('refresh-status').textContent = 'Last sync: ' + new Date().toLocaleTimeString();
+            } catch (err) {
+                console.error('Fetch failed:', err);
+                document.getElementById('refresh-status').textContent = '⚠️ Sidecar Offline';
+            }
+        }
+
+        // Initial fetch and poll
+        fetchStats();
+        setInterval(fetchStats, 5000);
+    </script>
+</body>
+
+</html>

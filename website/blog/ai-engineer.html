@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Building an LLM Firewall | IRL Blog</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@700;800&family=Manrope:wght@700;800&family=Open+Sans&family=Roboto:wght@400;500;700&display=swap"
+        rel="stylesheet">
+</head>
+
+<body>
+    <main>
+        <article class="section">
+            <div class="container" style="max-width: 800px;">
+                <a href="/blog.html" style="color: var(--secondary); margin-bottom: 2rem; display: block;">← Back to
+                    Blog</a>
+                <h1 style="font-size: 3rem; margin-bottom: 1.5rem;">Building an LLM Firewall: From Prompt Injection to
+                    Production Confidence</h1>
+                <div style="color: var(--text-secondary); margin-bottom: 3rem;">By IRL Engineering Team • January 1,
+                    2026</div>
+
+                <div class="blog-content" style="font-size: 1.1rem; line-height: 1.8;">
+                    <p>As an AI Engineer, you know the thrill of seeing a Large Language Model (LLM) solve a complex
+                        problem. But you also know the anxiety of putting that same LLM into production. What if a user
+                        finds a way to hijack your prompt? What if the model hallucinations and provides your customers
+                        with incorrect or offensive information?</p>
+
+                    <p style="margin-top: 1.5rem;">These are not just theoretical risks. They are real-world problems
+                        that can damage your product, your reputation, and your users' trust.</p>
+
+                    <h2 style="margin-top: 3rem;">The Problem: "Defensive Coding" Overload</h2>
+                    <p style="margin-top: 1rem;">Traditionally, protecting your application from a misbehaving LLM has
+                        meant writing a lot of "defensive code." This includes input validation, output parsing, and
+                        boilerplate safety code.</p>
+
+                    <h2 style="margin-top: 3rem;">The Solution: IRL's "Sentinel" as an LLM Firewall</h2>
+                    <p style="margin-top: 1rem;">IRL's "Sentinel" feature provides a simple yet powerful way to build an
+                        LLM Firewall. It allows you to define a set of "semantic invariants" that are enforced by the
+                        IRL sidecar.</p>
+
+                    <div class="glass"
+                        style="padding: 2rem; margin: 3rem 0; border-radius: 12px; font-family: monospace; background: #0A192F; color: #64FFDA;">
+                        {
+                        "invariants": [
+                        {
+                        "path": "order.total",
+                        "rule": "min",
+                        "value": 0
+                        }
+                        ]
+                        }
+                    </div>
+
+                    <p>This means you can reduce your codebase by up to 50%, iterate faster, and sleep better at night.
+                    </p>
+                </div>
+            </div>
+        </article>
+    </main>
+    <script type="module" src="/src/main.js"></script>
+</body>
+
+</html>
