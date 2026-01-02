@@ -1,65 +1,121 @@
 🛡️ Project IRL: Master Build Plan
-Product: AI Output Firewall & Integration Resilience Layer (IRL) Category: Enterprise Integration Control Plane Core Value: Preventing "Confidently Wrong" AI data and API drift from corrupting Systems of Record.
+Product: Integration Resilience Layer (IRL)
+Category: Enterprise Integration Control Plane
+Core Value: Eliminating integration fragility and "silent corruption" via deterministic schema governance.
 
 📍 1. Executive Summary for Agents
-IRL is a Language-Agnostic Sidecar Proxy. It sits between data producers (LLMs, SaaS Webhooks) and consumers (Databases, Neo4j, ERPs).
+IRL is a Language-Agnostic Sidecar Proxy. It sits between data producers (SaaS Webhooks, Partner APIs, LLMs) and consumers (Databases, Neo4j, ERPs).
 
-The Distinction: Unlike a simple validator, IRL uses Structural Fingerprinting and Semantic Invariants to "Quarantine" broken data before it hits production.
+The Distinction: Unlike a simple validator, IRL uses Structural Fingerprinting and Semantic Invariants to "Quarantine" broken data before it hits production, while providing a Zero-Knowledge forensic audit trail.
 
-Architecture: Node.js, NDJSON logging, Multi-tenant Registry, Zero-Trust AI (no PII sent to LLM).
+Level-Set: The original "AI Output Firewall" mission is the long-term vision; today, IRL is the foundational resilience layer for all high-value integrations.
 
 🚥 2. Progress Report (The "Audit" Checklist)
-Agents: Please verify these files exist and match the described logic.
 
-✅ Phase 1: The Observability Foundation
-[x] Sentinel (src/sentinel.js): Implements deterministic key-sorting and type-mapping.
+✅ Phase 1-5: The Hardening Core (COMPLETE)
+[x] Zero-Knowledge Privacy: PII is stripped and stored as SHA256 checksums (`src/utils/crypto.js`).
+[x] Safe Execution: JSON instruction engine replaces unsafe dynamic code (`src/safeMapper.js`).
+[x] Enterprise Auth: API key middleware with tenant isolation (`src/middleware/auth.js`).
+[x] Observability: P95 latency tracking and audit logging (`scripts/stats.js`).
+[x] Verification: `golden_path.js` validates all security boundaries.
 
-[x] Drift Factory (src/driftReport.js): Grades changes into INFO, WARN, or BLOCK.
+🚀 3. Current Sprint: Production Stability (Phase 6)
+Goal: Ensure IRL is ready for F500 mission-critical deployments.
 
-[x] Audit Log: Uses NDJSON for high-concurrency, corruption-resistant logging.
+🛠️ Active Task: Cloud-Native Hardening
+- [x] TLS/HTTPS: Encrypted sidecar communication.
+- [x] Health Probes: `/health` and `/ready` endpoints for K8s.
+- [x] Rate Limiting: Per-tenant throttling to prevent baseline poisoning.
+- [x] Graceful Shutdown: Connection draining on `SIGTERM`.
 
-✅ Phase 2: The Multi-Tenant Registry
-[x] Registry Scoping: Baselines are stored in registry/[integration]/baseline.json.
+✅ 4. COMPLETED: MCP Server Implementation (Replaces Phase 9)
 
-[x] Manifest: registry/manifest.json tracks last_healthy_sync per tenant.
+**Status**: COMPLETE (< 1 week)
+**Strategic Decision**: Built MCP servers instead of traditional Governance UI
 
-[x] Governance CLI (src/governance.js): Allows "Review & Release" of quarantined data.
+### What Was Built
 
-✅ Phase 3: The Universal Sidecar (Step 7 Complete)
-[x] Sidecar Proxy (src/sidecar.js): Express-based HTTP server on Port 3000.
+**3 MCP Servers** (11 tools, 8 resource URIs):
+1. **irl-governance** (4 tools) - Incident management workflows
+2. **irl-sentinel** (4 tools) - Schema validation and health monitoring
+3. **irl-ai-proposer** (3 tools) - Patch generation and testing
 
-[x] Status Gate: Returns 200 OK for healthy data; 422 Unprocessable Entity for BLOCK.
+### Strategic Benefits vs. Governance UI
 
-[x] Identification: Uses URL params /:integrationName to load correct baselines.
+| Criterion | Governance UI (Original Plan) | MCP Servers (Implemented) |
+|-----------|-------------------------------|---------------------------|
+| Development Time | 2-3 weeks | < 1 week ✅ |
+| Automation | Manual human clicks | Full agent automation ✅ |
+| Integration | Standalone web app | Claude Desktop + custom agents ✅ |
+| Maintenance | High (framework updates) | Low (MCP SDK stability) ✅ |
+| Future-Proof | UI-only | Can serve as backend for future UI ✅ |
 
-🚀 3. Current Sprint: The "Unicorn Wedge" (Step 8)
-Goal: Transform the proxy into an AI Output Firewall.
+### Agent-Driven Workflows Enabled
 
-🛠️ Active Task: Semantic Invariant Enforcement
-Goal: Detect structurally valid but logically impossible AI data.
+1. **Automated Incident Approval** - Agents auto-approve safe patches (simple renamings)
+2. **Proactive Validation** - CI/CD integration validates payloads before deployment
+3. **Audit Trail Analysis** - Agents analyze drift patterns and predict schema evolution
+4. **Health Monitoring** - Continuous system health checks with automated alerting
 
-Requirements:
+### Documentation
 
-Invariant Discovery: Sentinel must load registry/[integration]/invariants.json.
+- [MCP Server README](irl/mcp/README.md) - Complete tool reference
+- [Agent Workflows](docs/MCP_WORKFLOWS.md) - Automation patterns
+- [Governance Example](examples/agent-governance.md) - Automated approval
+- [Validation Example](examples/agent-validation.md) - CI/CD integration
+- [Validation Plan](docs/VALIDATION_PLAN.md) - 90-day plan to validate strategic claims
+- [Proof Points](docs/PROOF_POINTS.md) - Evidence-based proof points for fundraising
 
-Rule Logic: Support min, max, and regex (regex for IDs/emails, min/max for prices/counts).
+### Files Created
 
-The Failure: Generate CHANGE_TYPE: INVARIANT_VIOLATION. Severity must be BLOCK.
+```
+irl/mcp/
+├── governance-server.js      (549 lines)
+├── sentinel-server.js         (370 lines)
+├── ai-proposer-server.js      (430 lines)
+├── package.json
+├── README.md
+└── .gitignore
 
-Forwarding: (Optional) Successfully forwarded HEALTHY data to a TARGET_URL.
+docs/
+├── MCP_WORKFLOWS.md          (Agent workflow patterns)
+├── VALIDATION_PLAN.md         (90-day validation roadmap)
+└── PROOF_POINTS.md            (Evidence-based proof points)
 
-🗺️ 4. Future Roadmap (The Scale-Up)
-Step 9: Impact Dashboard: Visualizing "Financial Risk Avoided" metrics for VCs.
+examples/
+├── agent-governance.md        (Automated approval example)
+└── agent-validation.md        (CI/CD integration example)
 
-Step 10: Multi-Language Client SDKs
-  - [x] Python SDK (`clients/python/irl.py`): Zero-dependency wrapper with `urllib`, Python 3.10+
-  - [x] Java SDK (`clients/java/IrlClient.java`): Native `java.net.http` client (Java 11+)
-  - [x] Worktree Architecture: Separate SDK development in `../irl-python-sdk` and `../irl-java-sdk`
-  - [x] Registry Symlinks: Both SDKs reference centralized registry via symlinks
+scripts/
+└── analyze-agent-metrics.js   (Metrics analyzer)
+```
 
-Step 11: Agentic Negotiation: AI agent that auto-drafts emails to API providers when drift is detected.
+### Impact on Architecture Validation
 
-⚠️ 5. Guardrails & Constraints (Non-Negotiable)
+**Before MCP**:
+- ⚠️ "CLI-Only Governance: Non-technical stakeholders can't participate"
+
+**After MCP**:
+- ✅ "Agent-Driven Governance: Automated approval workflows via MCP tools"
+- ✅ "Agentic-First Design: Full API coverage for external automation"
+- ✅ "Production-Ready: Works with Claude Desktop immediately"
+
+### Next Phase
+
+Continue with **Phase 10: AI Guardrails & Observability** or iterate on MCP servers based on real-world usage.
+
+🗺️ 5. Future Roadmap (The Scale-Up)
+Step 9: Impact Dashboard: Visualizing "Financial Risk Avoided" metrics.
+Step 10: Multi-Language Client SDKs (COMPLETE):
+  - [x] Python SDK (`clients/python/irl.py`): Zero-dependency native wrapper.
+  - [x] Java SDK (`clients/java/IrlClient.java`): Native `java.net.http` client.
+Step 11: AI Output Firewall (Re-integration):
+  - Confidence score thresholds.
+  - PII Detection in LLM output.
+  - Hallucination detection via domain-specific invariants.
+Step 12: Agentic Negotiation: AI agent that auto-drafts emails to API providers when drift is detected.
+
+⚠️ 6. Guardrails & Constraints (Non-Negotiable)
 Zero-Trust: Never send raw data values (PII) to an LLM. Only send structural diffs.
 
 Deterministic: All fingerprints must be key-sorted.

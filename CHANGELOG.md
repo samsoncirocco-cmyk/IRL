@@ -8,12 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Added
+- **MCP Server Suite**: Agent-native governance platform
+  - `irl-governance` server (4 tools): Incident management workflows
+  - `irl-sentinel` server (4 tools): Schema validation and health monitoring
+  - `irl-ai-proposer` server (3 tools): Patch generation and safe preview
+  - 8 resource URI patterns for quarantine, released, Neo4j, registry access
+- Agent workflow documentation (`docs/MCP_WORKFLOWS.md`)
+- Validation plan and proof points (`docs/VALIDATION_PLAN.md`, `docs/PROOF_POINTS.md`)
+- Example agent workflows (`examples/agent-governance.md`, `examples/agent-validation.md`)
+- Metrics analyzer script (`scripts/analyze-agent-metrics.js`)
 - Registry documentation with schema definitions and governance workflow
 - CHANGELOG.md for tracking project milestones
 
 ### Changed
+- Strategic pivot: Replaced Governance UI plan with MCP server implementation
+- Updated IRL_MASTER_PLAN.md with MCP completion status and strategic benefits
+- Enhanced README.md with MCP server documentation and agent workflows
 - Updated CLAUDE.md to reflect Python SDK modernization (requests, Python 3.10+)
-- Enhanced IRL_MASTER_PLAN.md with detailed Step 10 completion status
 
 ## [0.3.0] - 2025-12-31
 
@@ -73,11 +84,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - [x] Multi-Language SDKs: Python and Java clients
 - [x] Worktree Architecture: Isolated SDK development
 - [x] Virtual Patching: AI-assisted remediation
+- [x] MCP Server Suite: Agent-native governance platform (3 servers, 11 tools)
 
 ### 🚀 In Progress
+- [ ] MCP server validation: 90-day plan to validate agent automation claims
 - [ ] Integration test suite with automated CI/CD
 - [ ] Impact Dashboard (Step 9): Financial risk metrics
-- [ ] Agentic Negotiation (Step 11): Auto-draft API provider emails
+- [ ] Agentic Negotiation (Step 12): Auto-draft API provider emails
 
 ### 📋 Planned
 - [ ] C# SDK for .NET/Azure enterprise customers

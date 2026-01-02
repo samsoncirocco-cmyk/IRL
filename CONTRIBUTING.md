@@ -14,3 +14,11 @@ This project uses a high-trust, high-verification model for AI agents.
 - **Python Agent**: Stay in `clients/python/`. Do not touch core `src/` unless necessary.
 - **Java Agent**: Stay in `clients/java/`. Do not touch core `src/` unless necessary.
 - **Architect**: Maintains `registry/` and core Node.js services.
+- **MCP Developer**: Works in `irl/mcp/` for MCP server implementations. Follows ES module patterns with CommonJS bridging.
+
+### MCP Server Development
+- All MCP servers use ES modules (`"type": "module"` in package.json)
+- Use `createRequire` pattern to bridge CommonJS parent codebase
+- Follow existing server patterns (see `governance-server.js` as template)
+- Test with MCP Inspector: `npx @modelcontextprotocol/inspector node [server].js`
+- Document all tools and resources in `irl/mcp/README.md`

@@ -1,6 +1,10 @@
 # IRL: Integration Resilience Layer
 
-IRL acts as an AI Output Firewall, sitting between data producers (LLMs) and your Systems of Record. It prevents "confidently wrong" AI data from corrupting your database by enforcing structural fingerprints and semantic invariants.
+IRL is a **Deterministic Schema Governance** solution that sits between data producers and your Systems of Record. It prevents "confidently wrong" data and unexpected schema drift from corrupting your database by enforcing structural fingerprints and semantic invariants.
+
+- **Structural Fingerprinting**: Detects schema changes at the field and type level.
+- **Zero-Knowledge Privacy**: Strips PII before storage, keeping your audit logs secure.
+- **Deterministic Healing**: Uses safe JSON mapping to resolve drift without custom code.
 
 ## Universal Governance
 
@@ -42,6 +46,89 @@ try {
     }
 }
 ```
+
+## Agent-Driven Governance (MCP Servers)
+
+IRL provides a suite of **MCP (Model Context Protocol) Servers** for agent-driven governance and monitoring. This enables Claude Desktop and custom agents to autonomously manage schema drift incidents, validate payloads, and monitor system health.
+
+- **`irl-governance`**: Manage incident workflows (list, preview, approve, reject).
+- **`irl-sentinel`**: Proactive schema validation and health monitoring.
+- **`irl-ai-proposer`**: Patch generation (deterministic or AI-powered) and safe preview execution.
+
+### Features
+
+- **Agent Automation**: Agents can list, preview, approve, or reject incidents programmatically
+- **Zero Setup**: Works immediately with Claude Desktop - no UI needed
+- **Resource Access**: URI-based access to quarantine, released, and Neo4j exports
+- **Audit Trail**: All agent actions logged with `approved_by` attribution
+
+### Quick Start
+
+**1. Install MCP Server:**
+```bash
+cd irl/mcp
+npm install
+```
+
+**2. Configure Claude Desktop:**
+
+Add to `~/.config/Claude/claude_desktop_config.json`:
+```json
+{
+  "mcpServers": {
+    "irl-governance": {
+      "command": "node",
+      "args": ["/Applications/Samson Stuff/code_irl/irl/mcp/governance-server.js"]
+    },
+    "irl-sentinel": {
+      "command": "node",
+      "args": ["/Applications/Samson Stuff/code_irl/irl/mcp/sentinel-server.js"]
+    },
+    "irl-ai-proposer": {
+      "command": "node",
+      "args": ["/Applications/Samson Stuff/code_irl/irl/mcp/ai-proposer-server.js"],
+      "env": {
+        "ANTHROPIC_API_KEY": "sk-ant-..."
+      }
+    }
+  }
+}
+```
+
+**3. Restart Claude Desktop and test:**
+```
+Agent: List all quarantined incidents for user_integration
+Agent: Preview incident 2026-01-01T17-28-20-262Z_0
+Agent: Approve patch with approved_by='agent-auto-approver'
+```
+
+### Available Tools
+
+#### Governance Tools (`irl-governance`)
+- `list_quarantined_incidents` - List all incidents for an integration
+- `preview_incident` - View drift reports and AI-proposed patches
+- `approve_patch` - Approve and release healed payloads
+- `reject_incident` - Reject and archive unsafe patches
+
+#### Sentinel Tools (`irl-sentinel`)
+- `compute_fingerprint` - Structural fingerprinting with optional invariants
+- `detect_drift` - Detect drift between baseline and incoming payloads
+- `validate_invariants` - Validate payload against integration invariants
+- `strip_pii` - Zero-knowledge PII stripping
+
+#### AI Proposer Tools (`irl-ai-proposer`)
+- `generate_patch` - Generate patch from drift reports (deterministic or AI)
+- `validate_patch` - Validate patch syntax
+- `apply_patch_preview` - Safely preview patch execution
+
+### Documentation
+
+- [MCP Server README](irl/mcp/README.md) - Full tool reference and examples
+- [Agent Workflows](docs/MCP_WORKFLOWS.md) - Common automation patterns
+- [Governance Example](examples/agent-governance.md) - Automated approval
+- [Validation Example](examples/agent-validation.md) - CI/CD integration
+- [Validation Plan](docs/VALIDATION_PLAN.md) - 90-day plan to validate strategic claims
+- [Proof Points](docs/PROOF_POINTS.md) - Evidence-based proof points for fundraising
 
 ## Architecture Validation
 
