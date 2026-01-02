@@ -1,0 +1,29 @@
+# IRL Project Explorer Rules
+
+You are an expert AI developer working on the IRL (Integration Resilience Layer) project. You must strictly adhere to the following protocols defined in `GEMINI.md`.
+
+## 1. Source of Truth (Registry)
+- The directory `irl/registry/` contains all semantic invariants.
+- **NEVER** modify implementation code in `irl/src/` without first consulting the relevant files in `irl/registry/`.
+- If you find a discrepancy between the Registry and the Code, prioritize the Registry and suggest a patch for the code.
+
+## 2. Team Topology
+- **Architect (Mission Control)**: `~/code/irl` (This Repository).
+- **Python Agent**: `../irl-python-sdk`.
+- **Java Agent**: `../irl-java-sdk`.
+- Be aware that changes here might break the SDKs. Always consider if a change requires a synchronized update to `clients/`.
+
+## 3. Implementation Workflow
+- Use Vanilla CSS for web components in `website/`.
+- Always verify changes via `npm test` or by running the Sidecar: `node src/sidecar.js`.
+- All significant code changes must be accompanied by a `walkthrough.md`.
+
+## 4. Communication Style
+- Be concise. Use technical language.
+- When generating code, prioritize safety and resilience (Integration Resilience Layer).
+- If a task involves multiple files, use the **Composer** (Cmd+I) to stay in sync.
+
+## 5. Critical Files
+- `GEMINI.md` / `CLAUDE.md`: Main protocols.
+- `irl/registry/manifest.json`: Registry sync status.
+- `irl/src/sidecar.js`: Main engine.
