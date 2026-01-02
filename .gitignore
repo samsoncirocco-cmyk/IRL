@@ -5,3 +5,8 @@ node_modules/
 __pycache__/
 .DS_Store
 clients/python/HANDOFF.md
+
+# Runtime data (quarantine, released payloads, audit logs)
+irl/quarantine/
+irl/released/
+irl/audit_log.json
