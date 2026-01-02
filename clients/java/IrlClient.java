@@ -23,13 +23,23 @@ public class IrlClient {
      * @return true if valid and forwarded
      * @throws RuntimeException if blocked or connection fails
      */
-    public static boolean verify(String payload, String integrationName, String sidecarUrl) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .uri(URI.create(sidecarUrl))
+    public static boolean verify(String payload, String integrationName, String sidecarUrl, String apiKey) {
+        String endpoint = sidecarUrl;
+        if (!endpoint.endsWith("/verify")) {
+            endpoint = endpoint.replaceAll("/$", "") + "/verify/" + integrationName;
+        }
+
+        HttpRequest.Builder builder = HttpRequest.newBuilder()
+                .uri(URI.create(endpoint))
                 .header("Content-Type", "application/json")
                 .header("x-irl-integration", integrationName)
-                .POST(HttpRequest.BodyPublishers.ofString(payload, StandardCharsets.UTF_8))
-                .build();
+                .POST(HttpRequest.BodyPublishers.ofString(payload, StandardCharsets.UTF_8));
+
+        if (apiKey != null && !apiKey.isEmpty()) {
+            builder.header("x-irl-api-key", apiKey);
+        }
+
+        HttpRequest request = builder.build();
 
         try {
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
@@ -38,6 +48,8 @@ public class IrlClient {
                 return true;
             } else if (response.statusCode() == 422) {
                 throw new RuntimeException("Invariant Violation: " + response.body());
+            } else if (response.statusCode() == 401) {
+                throw new RuntimeException("Unauthorized: Invalid API Key or Scope");
             } else {
                 throw new RuntimeException("IRL Sidecar Error: " + response.statusCode() + " - " + response.body());
             }

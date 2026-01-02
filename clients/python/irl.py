@@ -14,8 +14,9 @@ class IRLConnectionError(Exception):
     pass
 
 class Firewall:
-    def __init__(self, sidecar_url: str = "http://localhost:3000"):
+    def __init__(self, sidecar_url: str = "http://localhost:3000", api_key: str = None):
         self.sidecar_url = sidecar_url
+        self.api_key = api_key
 
     def verify(self, payload: Dict[str, Any], integration_name: str) -> bool:
         """
@@ -32,10 +33,17 @@ class Firewall:
             InvariantViolationError: If the payload is blocked due to invariant rules.
             IRLConnectionError: If the Sidecar is unreachable or returns an unexpected error.
         """
+        # Append /verify path if needed
+        endpoint = self.sidecar_url
+        if not endpoint.endswith('/verify'):
+            endpoint = f"{endpoint.rstrip('/')}/verify/{integration_name}"
+
         data = json.dumps(payload).encode('utf-8')
-        req = urllib.request.Request(self.sidecar_url, data=data, method="POST")
+        req = urllib.request.Request(endpoint, data=data, method="POST")
         req.add_header('Content-Type', 'application/json')
         req.add_header('x-irl-integration', integration_name)
+        if self.api_key:
+            req.add_header('x-irl-api-key', self.api_key)
 
         try:
             with urllib.request.urlopen(req) as response:
