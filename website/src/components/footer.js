@@ -12,7 +12,7 @@ export function renderFooter() {
           <h4>Resources</h4>
           <ul>
             <li><a href="/blog.html">Blog</a></li>
-            <li><a href="https://github.com/your-repo/irl">Documentation</a></li>
+            <li><a href="https://github.com/samson/irl">Documentation</a></li>
             <li><a href="/community.html">Community</a></li>
           </ul>
         </div>
