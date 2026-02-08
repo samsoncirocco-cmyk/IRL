@@ -1,0 +1,2 @@
+# This file ensures the execution/ directory structure is tracked by git
+# Actual execution logs, state, and results are excluded via .gitignore
